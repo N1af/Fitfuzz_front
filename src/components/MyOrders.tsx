@@ -57,27 +57,34 @@ export default function MyOrders() {
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
+  // State for confirmation popup
+  const [confirmDelivery, setConfirmDelivery] = useState<{
+    orderId: number;
+    productId: number;
+  } | null>(null);
+
   /* ================= FETCH ================= */
 
-  useEffect(() => {
+  const fetchOrders = async () => {
     if (!userId) {
       setLoading(false);
       return;
     }
 
-    const fetchOrders = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:5000/api/orders/my-orders/${userId}`
-        );
-        setOrders(res.data || []);
-      } catch (err) {
-        console.error("❌ Fetch orders failed", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setLoading(true);
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/orders/my-orders/${userId}`
+      );
+      setOrders(res.data || []);
+    } catch (err) {
+      console.error("❌ Fetch orders failed", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchOrders();
   }, [userId]);
 
@@ -109,6 +116,111 @@ export default function MyOrders() {
     }
   };
 
+  /* ================= MARK ITEM DELIVERED ================= */
+
+  const markAsDelivered = async (orderId: number, productId: number) => {
+    try {
+      await axios.put(
+        `http://localhost:5000/api/orders/mark-delivered`,
+        { order_id: orderId, product_id: productId }
+      );
+      fetchOrders();
+      setConfirmDelivery(null); // close confirmation popup
+    } catch (err) {
+      console.error("❌ Failed to mark as delivered", err);
+    }
+  };
+
+  /* ================= ORDER CATEGORIES ================= */
+
+  const activeOrders: OrderItem[] = [];
+  const deliveredOrders: OrderItem[] = [];
+
+  filteredOrders.forEach((order) => {
+    order.items.forEach((item) => {
+      const itemWithOrder = {
+        ...item,
+        order_id: order.order_id,
+        created_at: order.created_at,
+        total: order.total,
+        delivery: order.delivery,
+        tracking_id: order.tracking_id,
+        payment_method: order.payment_method,
+      };
+      if (item.status.toLowerCase() === "delivered") {
+        deliveredOrders.push(itemWithOrder);
+      } else {
+        activeOrders.push(itemWithOrder);
+      }
+    });
+  });
+
+  /* ================= RENDER ORDER ITEM CARD ================= */
+
+  const renderOrderItemCard = (item: any) => {
+    const previewImage = item.image_url || "https://via.placeholder.com/100";
+
+    return (
+      <Card
+        key={`${item.order_id}-${item.product_id}`}
+        className="flex flex-col md:flex-row items-center gap-4 p-4 hover:shadow-lg transition"
+      >
+        <img
+          src={previewImage}
+          alt="Product"
+          className="w-24 h-24 object-cover rounded border"
+        />
+
+        <div className="flex-1 space-y-1 text-center md:text-left">
+          <h2 className="font-semibold text-lg">Order #{item.order_id}</h2>
+          <p className="text-gray-500 text-sm">
+            {new Date(item.created_at).toLocaleDateString()}
+          </p>
+          <p className="font-medium text-gray-800">
+            Rs. {item.price * item.quantity}
+          </p>
+          <div className="flex items-center justify-center md:justify-start gap-2">
+            {getStatusIcon(item.status)}
+            <Badge variant="outline">{item.status}</Badge>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 md:flex-row md:items-center">
+          {item.status.toLowerCase() !== "delivered" && (
+            <Button
+              className="w-full md:w-auto"
+              onClick={() =>
+                setConfirmDelivery({
+                  orderId: item.order_id,
+                  productId: item.product_id,
+                })
+              }
+            >
+              Mark as Delivered
+            </Button>
+          )}
+          <Button
+            className="w-full md:w-auto"
+            onClick={() =>
+              setSelectedOrder({
+                order_id: item.order_id,
+                total: item.total,
+                status: item.status,
+                created_at: item.created_at,
+                payment_method: item.payment_method,
+                tracking_id: item.tracking_id,
+                delivery: item.delivery,
+                items: [item],
+              })
+            }
+          >
+            View Details
+          </Button>
+        </div>
+      </Card>
+    );
+  };
+
   /* ================= UI ================= */
 
   return (
@@ -130,7 +242,7 @@ export default function MyOrders() {
           </div>
         </div>
 
-        {/* Orders List */}
+        {/* Active Orders */}
         {loading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <Card key={i} className="p-4 space-y-3">
@@ -139,58 +251,25 @@ export default function MyOrders() {
               <Skeleton className="h-4 w-1/4" />
             </Card>
           ))
-        ) : filteredOrders.length > 0 ? (
-          filteredOrders.map((order) => {
-            const previewImage =
-              order.items[0]?.image_url ||
-              "https://via.placeholder.com/100";
-
-            return (
-              <Card
-                key={order.order_id}
-                className="flex flex-col md:flex-row items-center gap-4 p-4 hover:shadow-lg transition"
-              >
-                {/* IMAGE */}
-                <img
-                  src={previewImage}
-                  alt="Product"
-                  className="w-24 h-24 object-cover rounded border"
-                />
-
-                <div className="flex-1 space-y-1 text-center md:text-left">
-                  <h2 className="font-semibold text-lg">
-                    Order #{order.order_id}
-                  </h2>
-                  <p className="text-gray-500 text-sm">
-                    {new Date(order.created_at).toLocaleDateString()}
-                  </p>
-                  <p className="font-medium text-gray-800">
-                    Rs. {order.total}
-                  </p>
-                  <div className="flex items-center justify-center md:justify-start gap-2">
-                    {getStatusIcon(order.status)}
-                    <Badge variant="outline">{order.status}</Badge>
-                  </div>
-                </div>
-
-                <Button
-                  className="w-full md:w-auto"
-                  onClick={() => setSelectedOrder(order)}
-                >
-                  View Details
-                </Button>
-              </Card>
-            );
-          })
+        ) : activeOrders.length > 0 ? (
+          <>
+            <h2 className="text-xl font-semibold">Active Orders</h2>
+            {activeOrders.map(renderOrderItemCard)}
+          </>
         ) : (
-          <p className="text-gray-500 text-center py-10">
-            No orders found.
-          </p>
+          <p className="text-gray-500 text-center py-4">No active orders.</p>
+        )}
+
+        {/* Completed Orders */}
+        {deliveredOrders.length > 0 && (
+          <>
+            <h2 className="text-xl font-semibold mt-8">Completed Orders</h2>
+            {deliveredOrders.map(renderOrderItemCard)}
+          </>
         )}
       </div>
 
       {/* ================= ORDER DETAILS DIALOG ================= */}
-
       <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -199,12 +278,9 @@ export default function MyOrders() {
 
           {selectedOrder && (
             <div className="space-y-4">
-              {/* Items */}
               {selectedOrder.items.map((item, idx) => (
                 <div key={idx} className="border rounded p-3 space-y-1">
-                  <p className="font-medium">
-                    Product ID: {item.product_id}
-                  </p>
+                  <p className="font-medium">Product ID: {item.product_id}</p>
                   <p className="text-sm text-gray-500">
                     Seller: {item.seller_name || "N/A"}
                   </p>
@@ -212,15 +288,27 @@ export default function MyOrders() {
                     Rs. {item.price} × {item.quantity}
                   </p>
                   <Badge variant="secondary">{item.status}</Badge>
+                  {item.status.toLowerCase() !== "delivered" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setConfirmDelivery({
+                          orderId: item.order_id,
+                          productId: item.product_id,
+                        })
+                      }
+                    >
+                      Mark as Delivered
+                    </Button>
+                  )}
                 </div>
               ))}
 
-              {/* Meta */}
               <div className="border-t pt-3 text-sm space-y-2">
                 <p className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
-                  Ordered:{" "}
-                  {new Date(selectedOrder.created_at).toLocaleDateString()}
+                  Ordered: {new Date(selectedOrder.created_at).toLocaleDateString()}
                 </p>
                 <p className="flex items-center gap-2">
                   <Truck className="w-4 h-4" />
@@ -228,8 +316,7 @@ export default function MyOrders() {
                 </p>
                 <p className="flex items-center gap-2">
                   <MapPin className="w-4 h-4" />
-                  {selectedOrder.delivery.village},{" "}
-                  {selectedOrder.delivery.district},{" "}
+                  {selectedOrder.delivery.village}, {selectedOrder.delivery.district},{" "}
                   {selectedOrder.delivery.province}
                 </p>
                 <p className="flex items-center gap-2">
@@ -243,6 +330,34 @@ export default function MyOrders() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ================= CONFIRMATION POPUP ================= */}
+      <Dialog
+        open={!!confirmDelivery}
+        onOpenChange={() => setConfirmDelivery(null)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Delivery</DialogTitle>
+          </DialogHeader>
+          <p className="py-4">
+            Are you sure you want to mark this item as delivered?
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setConfirmDelivery(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() =>
+                confirmDelivery &&
+                markAsDelivered(confirmDelivery.orderId, confirmDelivery.productId)
+              }
+            >
+              Confirm
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

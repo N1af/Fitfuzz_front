@@ -53,15 +53,19 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
     brand_id: "",
     category_id: "",
     subcategory_id: "",
+    sizes: [] as string[],
+    colors: [] as string[],
   });
 
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
+  const [sizes, setSizes] = useState<any[]>([]);
+  const [colors, setColors] = useState<any[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
 
-  /* ✅ Load categories once */
+  /* ✅ Load categories, brands, sizes, colors once */
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/categories")
@@ -72,6 +76,16 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
       .get("http://localhost:5000/api/brands")
       .then((res) => setBrands(res.data))
       .catch(() => toast.error("Failed to load brands"));
+
+    axios
+      .get("http://localhost:5000/api/sizes")
+      .then((res) => setSizes(res.data))
+      .catch(() => toast.error("Failed to load sizes"));
+
+    axios
+      .get("http://localhost:5000/api/colors")
+      .then((res) => setColors(res.data))
+      .catch(() => toast.error("Failed to load colors"));
   }, []);
 
   /* ✅ Load subcategories ONLY for selected category */
@@ -81,10 +95,12 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
       return;
     }
 
-    setSubcategories([]); // 🔴 CLEAR OLD SUBCATEGORIES FIRST
+    setSubcategories([]);
 
     axios
-      .get(`http://localhost:5000/api/products/subcategories/${form.category_id}`)
+      .get(
+        `http://localhost:5000/api/products/subcategories/${form.category_id}`
+      )
       .then((res) => setSubcategories(res.data))
       .catch(() => toast.error("Failed to load subcategories"));
   }, [form.category_id]);
@@ -130,8 +146,16 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    if (!form.category_id || !form.subcategory_id || !form.brand_id) {
-      toast.error("Please select category, subcategory and brand");
+    if (
+      !form.category_id ||
+      !form.subcategory_id ||
+      !form.brand_id ||
+      !form.sizes.length ||
+      !form.colors.length
+    ) {
+      toast.error(
+        "Please select category, subcategory, brand, size, and color"
+      );
       return;
     }
 
@@ -154,6 +178,8 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
         brand_id: Number(form.brand_id),
         category_id: Number(form.category_id),
         subcategory_id: Number(form.subcategory_id),
+        sizes: form.sizes.map(Number), // ✅ send all selected sizes as array of numbers
+        colors: form.colors.map(Number), // ✅ send all selected colors as array of numbers
         image_url: uploadedUrls[0],
         seller_id: Number(sellerId),
         status: "pending",
@@ -175,6 +201,26 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
     }
   };
 
+  /* ================= HANDLE SIZE CHECKBOX ================= */
+  const toggleSize = (sizeId: string) => {
+    setForm((prev) => ({
+      ...prev,
+      sizes: prev.sizes.includes(sizeId)
+        ? prev.sizes.filter((s) => s !== sizeId)
+        : [...prev.sizes, sizeId],
+    }));
+  };
+
+  /* ================= HANDLE COLOR CHECKBOX ================= */
+  const toggleColor = (colorId: string) => {
+    setForm((prev) => ({
+      ...prev,
+      colors: prev.colors.includes(colorId)
+        ? prev.colors.filter((c) => c !== colorId)
+        : [...prev.colors, colorId],
+    }));
+  };
+
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -190,9 +236,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
             <Label>Product Name *</Label>
             <Input
               value={form.name}
-              onChange={(e) =>
-                setForm({ ...form, name: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
             />
           </div>
@@ -215,9 +259,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
               <Input
                 type="number"
                 value={form.price}
-                onChange={(e) =>
-                  setForm({ ...form, price: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, price: e.target.value })}
                 required
               />
             </div>
@@ -227,15 +269,13 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
               <Input
                 type="number"
                 value={form.stock}
-                onChange={(e) =>
-                  setForm({ ...form, stock: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, stock: e.target.value })}
                 required
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-4">
             {/* Category */}
             <div>
               <Label>Category *</Label>
@@ -302,9 +342,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
               <Label>Brand *</Label>
               <Select
                 value={form.brand_id}
-                onValueChange={(value) =>
-                  setForm({ ...form, brand_id: value })
-                }
+                onValueChange={(value) => setForm({ ...form, brand_id: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select brand" />
@@ -317,6 +355,41 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Size */}
+            <div>
+              <Label>Size *</Label>
+              <div className="flex flex-wrap gap-3 mt-2">
+                {sizes.map((s) => (
+                  <label key={s.id} className="flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      checked={form.sizes.includes(String(s.id))}
+                      onChange={() => toggleSize(String(s.id))}
+                    />
+                    {s.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Colors */}
+          <div>
+            <Label>Colors *</Label>
+            <div className="flex flex-wrap gap-3 mt-1">
+              {colors.map((c) => (
+                <label key={c.id} className="flex items-center gap-1">
+                  <input
+                    type="checkbox"
+                    value={c.id}
+                    checked={form.colors.includes(String(c.id))}
+                    onChange={() => toggleColor(String(c.id))}
+                  />
+                  {c.name}
+                </label>
+              ))}
             </div>
           </div>
 
