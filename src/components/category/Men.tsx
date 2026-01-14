@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import api from "../../api"; // because AddProductForm is in src/components/seller/
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -67,8 +68,8 @@ const Men = () => {
     const fetchData = async () => {
       try {
         const [bRes, cRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/men/brands"),
-          axios.get("http://localhost:5000/api/men/subcategories"),
+          api.get("/api/men/brands"),
+          api.get("/api/men/subcategories"),
         ]);
         setBrands(bRes.data);
         setCategories(cRes.data);
@@ -88,7 +89,7 @@ const Men = () => {
         if (selectedCategories.length > 0)
           params.subcategories = selectedCategories.join(",");
 
-        const res = await axios.get("http://localhost:5000/api/men/products", {
+        const res = await api.get("/api/men/products", {
           params,
         });
         setProducts(res.data);

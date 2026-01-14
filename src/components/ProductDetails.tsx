@@ -11,7 +11,7 @@ import {
   RotateCcw,
   ChevronRight,
 } from "lucide-react";
-import axios from "axios";
+import api from "../api";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -72,20 +72,20 @@ const ProductDetails = () => {
   /* ================= FETCH DATA ================= */
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/products/${id}`)
+    api.get(`http://localhost:5000/api/products/${id}`)
       .then(res => setProduct(res.data))
       .catch(console.error);
   }, [id]);
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/feedback/product/${id}`)
+    api.get(`http://localhost:5000/api/feedback/product/${id}`)
       .then(res => setFeedbacks(res.data))
       .catch(console.error);
   }, [id]);
 
   useEffect(() => {
     if (!userId) return;
-    axios.get(`http://localhost:5000/api/locations/latest/${userId}`)
+    api.get(`http://localhost:5000/api/locations/latest/${userId}`)
       .then(res => setLatestLocation(res.data))
       .catch(console.error);
   }, [userId]);
@@ -100,7 +100,7 @@ const ProductDetails = () => {
   const saveLocation = async (data: LocationData) => {
     if (!userId) return;
     try {
-      const res = await axios.post("http://localhost:5000/api/locations", {
+      const res = await api.post("/api/locations", {
         ...data,
         user_id: userId,
       });

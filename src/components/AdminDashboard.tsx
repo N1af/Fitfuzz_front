@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, Store, Package, DollarSign } from "lucide-react";
-import axios from "axios";
+import api from "../api";
 
 import ManageUsers from "@/components/admin/ManageUsers";
 import ManageSellers from "@/components/admin/ManageSellers";
@@ -29,7 +29,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchTotals = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/admin/totals");
+        const res = await api.get("/api/admin/totals");
         const data = res.data;
 
         setStats([

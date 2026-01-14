@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -73,7 +73,7 @@ export default function MyOrders() {
 
     setLoading(true);
     try {
-      const res = await axios.get(
+      const res = await api.get(
         `http://localhost:5000/api/orders/my-orders/${userId}`
       );
       setOrders(res.data || []);
@@ -120,7 +120,7 @@ export default function MyOrders() {
 
   const markAsDelivered = async (orderId: number, productId: number) => {
     try {
-      await axios.put(
+      await api.put(
         `http://localhost:5000/api/orders/mark-delivered`,
         { order_id: orderId, product_id: productId }
       );

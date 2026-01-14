@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
+import api from "../api";
 
 interface LocationFormProps {
   onClose: () => void;
@@ -32,7 +32,7 @@ const LocationForm: FC<LocationFormProps> = ({ onClose, onSaved }) => {
 
   // Load provinces
   useEffect(() => {
-    axios.get("http://localhost:5000/api/locations/provinces")
+    api.get("/api/locations/provinces")
       .then(res => setProvinces(res.data))
       .catch(err => console.error(err));
   }, []);
@@ -40,7 +40,7 @@ const LocationForm: FC<LocationFormProps> = ({ onClose, onSaved }) => {
   // Load districts
   useEffect(() => {
     if (!selectedProvince) return;
-    axios.get(`http://localhost:5000/api/locations/districts/${selectedProvince}`)
+    api.get(`http://localhost:5000/api/locations/districts/${selectedProvince}`)
       .then(res => {
         setDistricts(res.data);
         setSelectedDistrict("");
@@ -53,7 +53,7 @@ const LocationForm: FC<LocationFormProps> = ({ onClose, onSaved }) => {
   // Load villages
   useEffect(() => {
     if (!selectedProvince || !selectedDistrict) return;
-    axios.get(`http://localhost:5000/api/locations/villages/${selectedProvince}/${selectedDistrict}`)
+    api.get(`http://localhost:5000/api/locations/villages/${selectedProvince}/${selectedDistrict}`)
       .then(res => {
         setVillages(res.data);
         setSelectedVillage("");
@@ -76,7 +76,7 @@ const LocationForm: FC<LocationFormProps> = ({ onClose, onSaved }) => {
 
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/locations", {
+      const res = await api.post("/api/locations", {
         user_id: userId,
         province: selectedProvince,
         district: selectedDistrict,

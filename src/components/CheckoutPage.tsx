@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
-import axios from "axios";
+import api from "../api";
 
 const Checkout = () => {
   const { items, clearCart } = useCart();
@@ -36,7 +36,7 @@ const Checkout = () => {
 
     const fetchLatestLocation = async () => {
       try {
-        const res = await axios.get(
+        const res = await api.get(
           `http://localhost:5000/api/locations/latest/${user.id}`
         );
         if (res.data) setLatestLocation(res.data);
@@ -60,7 +60,7 @@ const Checkout = () => {
         seller_id: item.seller_id, // ✅ Ensure seller_id is included
       }));
 
-      const response = await axios.post("http://localhost:5000/api/checkout", {
+      const response = await api.post("/api/checkout", {
         user_id: user.id,
         location_id: latestLocation.id,
         items: itemsWithSeller,

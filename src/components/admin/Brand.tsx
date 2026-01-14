@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import AddBrandForm from "./AddBrand";
 import { useEffect, useState } from "react";
 import { Plus, Trash } from "lucide-react";
-import axios from "axios";
+import api from "../../api"; // because AddProductForm is in src/components/seller/
+
 
 interface Brand {
     id: string;
@@ -19,7 +20,7 @@ export default function Brand() {
     // Add new brand
     const handleAddBrand = async (newBrand: Omit<Brand, "id">) => {
         try {
-            const res = await axios.post("http://localhost:5000/api/brands/create-brand", newBrand);
+            const res = await api.post("/api/brands/create-brand", newBrand);
             setBrands((prev) => [res.data.brand, ...prev]);
             setIsAddBrandOpen(false);
             toast.success("Brand added successfully!");
@@ -34,7 +35,7 @@ export default function Brand() {
         if (!confirm("Are you sure you want to delete this brand?")) return;
 
         try {
-            await axios.delete(`http://localhost:5000/api/brands/${id}`);
+            await api.delete(`http://localhost:5000/api/brands/${id}`);
             setBrands((prev) => prev.filter((b) => b.id !== id));
             toast.success("Brand deleted successfully!");
         } catch (err) {
@@ -46,7 +47,7 @@ export default function Brand() {
     // Fetch all brands
     const fetchBrands = async () => {
         try {
-            const res = await axios.get("http://localhost:5000/api/brands/");
+            const res = await api.get("/api/brands/");
             const brandsData = Array.isArray(res.data)
                 ? res.data
                 : Array.isArray(res.data.brands)

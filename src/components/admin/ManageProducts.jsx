@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api"; // because AddProductForm is in src/components/seller/
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
@@ -10,7 +10,7 @@ const ManageProducts = () => {
   // 🧠 Fetch all products
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin-products");
+      const res = await api.get("/api/admin-products");
       setProducts(res.data.products || []); // ✅ extract only the array
     } catch (err) {
       console.error("❌ Error fetching products:", err);
@@ -26,7 +26,7 @@ const ManageProducts = () => {
   // ✅ Approve product
   const handleApprove = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/api/admin-products/${id}/approve`);
+      await api.put(`http://localhost:5000/api/admin-products/${id}/approve`);
       toast({ title: "✅ Product approved" });
       fetchProducts();
     } catch (err) {
@@ -38,7 +38,7 @@ const ManageProducts = () => {
   // ❌ Reject product
   const handleReject = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/api/admin-products/${id}/reject`);
+      await api.put(`http://localhost:5000/api/admin-products/${id}/reject`);
       toast({ title: "❌ Product rejected" });
       fetchProducts();
     } catch (err) {

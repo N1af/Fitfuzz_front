@@ -18,7 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Ban, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
+import api from "../../api"; // because AddProductForm is in src/components/seller/
+
 
 interface User {
   id: number;
@@ -37,7 +38,7 @@ const ManageUsers = () => {
   // ✅ Fetch users from backend
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/admin/users");
+      const res = await api.get("/api/admin/users");
       setUsers(res.data);
     } catch (err) {
       console.error("❌ Error fetching users:", err);
@@ -54,7 +55,7 @@ const ManageUsers = () => {
   // 🚫 Suspend / Reactivate user
   const handleSuspend = async (userId: number, name: string) => {
     try {
-      const res = await axios.patch(
+      const res = await api.patch(
         `http://localhost:5000/api/admin/users/${userId}/suspend`
       );
       toast.success(res.data.message);
@@ -74,7 +75,7 @@ const ManageUsers = () => {
   const handleDelete = async (userId: number, name: string) => {
     if (!confirm(`Are you sure you want to delete ${name}?`)) return;
     try {
-      const res = await axios.delete(
+      const res = await api.delete(
         `http://localhost:5000/api/admin/users/${userId}`
       );
       toast.success(res.data.message);

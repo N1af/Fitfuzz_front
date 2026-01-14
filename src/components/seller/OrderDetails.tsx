@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import api from "../../api"; // 
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -29,7 +30,7 @@ const OrderDetails = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const res = await axios.get(
+        const res = await api.get(
           `http://localhost:5000/api/seller-orders/order/${orderId}`
         );
 
@@ -62,7 +63,7 @@ const OrderDetails = () => {
     if (!order) return;
 
     try {
-      await axios.put(
+      await api.put(
         `http://localhost:5000/api/seller-orders/${order.id}/status`,
         { status: newStatus }
       );

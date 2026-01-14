@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api"; // because AddProductForm is in src/components/seller/
+
 import {
   Card,
   CardContent,
@@ -37,12 +38,12 @@ interface Seller {
 const ManageSellers = () => {
   const [sellers, setSellers] = useState<Seller[]>([]);
   const navigate = useNavigate();
-  const API_URL = "http://localhost:5000/api/admin-sellers";
+  const API_URL = "/api/admin-sellers";
 
   // Fetch all sellers
   const fetchSellers = async () => {
     try {
-      const res = await axios.get(API_URL);
+      const res = await api.get(API_URL);
       setSellers(res.data);
     } catch (err) {
       console.error("Fetch Error:", err);
@@ -57,7 +58,7 @@ const ManageSellers = () => {
   // Handle verify
   const handleVerify = async (id: number, name: string) => {
     try {
-      await axios.put(`${API_URL}/${id}/verify`);
+      await api.put(`${API_URL}/${id}/verify`);
       toast.success(`✅ Seller ${name} verified successfully`);
       fetchSellers();
     } catch {
@@ -68,7 +69,7 @@ const ManageSellers = () => {
   // Handle suspend/unsuspend
   const handleSuspend = async (id: number, name: string) => {
     try {
-      await axios.put(`${API_URL}/${id}/suspend`);
+      await api.put(`${API_URL}/${id}/suspend`);
       toast.warning(`⚠️ Seller ${name} status updated`);
       fetchSellers();
     } catch {
@@ -79,7 +80,7 @@ const ManageSellers = () => {
   // Handle delete
   const handleDelete = async (id: number, name: string) => {
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await api.delete(`${API_URL}/${id}`);
       toast.success(`🗑️ Seller ${name} deleted`);
       fetchSellers();
     } catch {

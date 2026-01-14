@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api"; // because AddProductForm is in src/components/seller/
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, Trash2 } from "lucide-react";
@@ -28,7 +29,7 @@ const Posters = () => {
   /* ---------------- Fetch Posters ---------------- */
   const fetchPosters = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/posters");
+      const res = await api.get("/api/posters");
       setPosters(res.data);
     } catch (err) {
       console.error("❌ Fetch posters failed", err);
@@ -38,7 +39,7 @@ const Posters = () => {
   /* ---------------- Fetch Categories ---------------- */
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/categories");
+      const res = await api.get("/api/categories");
       setCategories(res.data);
       if (res.data.length > 0) setCategoryId(res.data[0].id); // default first category
     } catch (err) {
@@ -53,8 +54,8 @@ const Posters = () => {
 
   /* ---------------- Get S3 Presigned URL ---------------- */
   const getPosterUploadUrl = async (file: File) => {
-    const { data } = await axios.post(
-      "http://localhost:5000/api/posters/upload-poster-urls",
+    const { data } = await api.post(
+      "/api/posters/upload-poster-urls",
       { files: [{ fileName: file.name, fileType: file.type }] }
     );
     return data.urls[0];
@@ -71,11 +72,11 @@ const Posters = () => {
       setLoading(true);
       const { uploadUrl, imageUrl } = await getPosterUploadUrl(file);
 
-      await axios.put(uploadUrl, file, {
+      await api.put(uploadUrl, file, {
         headers: { "Content-Type": file.type },
       });
 
-      await axios.post("http://localhost:5000/api/posters/create", {
+      await api.post("/api/posters/create", {
         title,
         image_url: imageUrl,
         category_id: categoryId,
@@ -96,7 +97,7 @@ const Posters = () => {
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this poster?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/posters/${id}`);
+      await api.delete(`http://localhost:5000/api/posters/${id}`);
       fetchPosters();
     } catch (err) {
       console.error("❌ Delete failed", err);

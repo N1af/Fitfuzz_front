@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
-import axios from "axios";
+import api from "../api";
 import ProductCard from "./ProductCard";
 import { ArrowRight } from "lucide-react";
 import menImage from "@/assets/dress-1.jpg";
@@ -104,9 +104,9 @@ const ProductGrid = () => {
     const fetchData = async () => {
       try {
         const [productRes, brandRes, categoryRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/products"),
-          axios.get("http://localhost:5000/api/brands"),
-          axios.get("http://localhost:5000/api/categories"),
+          api.get("/api/products"),
+          api.get("/api/brands"),
+          api.get("/api/categories"),
         ]);
 
         const fixedProducts = productRes.data.map((p: any) => ({

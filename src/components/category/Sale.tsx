@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import api from "../../api"; // because AddProductForm is in src/components/seller/
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -65,9 +66,9 @@ const Sale = () => {
     const fetchData = async () => {
       try {
         const [bRes, cRes, pRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/sale/brands"),
-          axios.get("http://localhost:5000/api/sale/subcategories"),
-          axios.get("http://localhost:5000/api/sale/products"),
+          api.get("/api/sale/brands"),
+          api.get("/api/sale/subcategories"),
+          api.get("/api/sale/products"),
         ]);
 
         setBrands(bRes.data);

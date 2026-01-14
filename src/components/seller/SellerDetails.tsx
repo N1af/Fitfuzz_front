@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
+import api from "../../api"; // because AddProductForm is in src/components/seller/
+
 import { Badge } from "@/components/ui/badge";
 
 interface Seller {
@@ -37,7 +38,7 @@ const SellerDetails = ({ sellerId }: SellerDetailsProps) => {
       setError(null);
 
       try {
-        const res = await axios.get(`http://localhost:5000/api/seller/${sellerId}`);
+        const res = await api.get(`http://localhost:5000/api/seller/${sellerId}`);
         if (isMounted) {
           setSellerDetails(res.data.seller);
         }

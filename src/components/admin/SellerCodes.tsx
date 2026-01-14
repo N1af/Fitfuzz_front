@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import axios from "axios";
+import api from "../../api"; // because AddProductForm is in src/components/seller/
+
 
 const SellerCodes = () => {
   const [codes, setCodes] = useState<any[]>([]);
@@ -12,7 +13,7 @@ const SellerCodes = () => {
   useEffect(() => {
     const fetchCodes = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/seller-codes");
+        const res = await api.get("/api/seller-codes");
         setCodes(res.data);
       } catch (error) {
         console.error("❌ Error fetching codes:", error);
@@ -25,7 +26,7 @@ const SellerCodes = () => {
   const generateCode = async () => {
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/seller-codes/generate");
+      const res = await api.post("/api/seller-codes/generate");
       setCodes([res.data, ...codes]);
     } catch (error) {
       console.error("❌ Error generating code:", error);

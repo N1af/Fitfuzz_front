@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import axios from "axios";
+import api from "../api";
 
 const SellerLogin = () => {
   const [storeName, setStoreName] = useState("");
@@ -24,7 +24,7 @@ const SellerLogin = () => {
 
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/seller/login", {
+      const res = await api.post("/api/auth/seller/login", {
         storeName,
         email,
         password,

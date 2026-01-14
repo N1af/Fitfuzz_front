@@ -19,7 +19,8 @@ import {
 } from "@/components/ui/select";
 import { X } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
+import api from "../../api"; // because AddProductForm is in src/components/seller/
+
 
 export interface Product {
   id: number;
@@ -67,23 +68,23 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
 
   /* ✅ Load categories, brands, sizes, colors once */
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/categories")
+    api
+      .get("/api/categories")
       .then((res) => setCategories(res.data))
       .catch(() => toast.error("Failed to load categories"));
 
-    axios
-      .get("http://localhost:5000/api/brands")
+    api
+      .get("/api/brands")
       .then((res) => setBrands(res.data))
       .catch(() => toast.error("Failed to load brands"));
 
-    axios
-      .get("http://localhost:5000/api/sizes")
+    api
+      .get("/api/sizes")
       .then((res) => setSizes(res.data))
       .catch(() => toast.error("Failed to load sizes"));
 
-    axios
-      .get("http://localhost:5000/api/colors")
+    api
+      .get("/api/colors")
       .then((res) => setColors(res.data))
       .catch(() => toast.error("Failed to load colors"));
   }, []);
@@ -97,7 +98,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
 
     setSubcategories([]);
 
-    axios
+    api
       .get(
         `http://localhost:5000/api/products/subcategories/${form.category_id}`
       )
@@ -127,14 +128,14 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
       fileType: f.type,
     }));
 
-    const { data } = await axios.post(
-      "http://localhost:5000/api/s3/generate-upload-urls",
+    const { data } = await api.post(
+      "/api/s3/generate-upload-urls",
       { files: fileInfos }
     );
 
     await Promise.all(
       files.map((file, i) =>
-        axios.put(data.urls[i].uploadUrl, file, {
+        api.put(data.urls[i].uploadUrl, file, {
           headers: { "Content-Type": file.type },
         })
       )
@@ -185,8 +186,8 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
         status: "pending",
       };
 
-      const res = await axios.post(
-        "http://localhost:5000/api/products",
+      const res = await api.post(
+        "/api/products",
         payload
       );
 

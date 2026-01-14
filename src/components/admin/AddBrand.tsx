@@ -10,7 +10,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../../api"; // because AddProductForm is in src/components/seller/
+
 import { Button } from "../ui/button";
 
 export interface Brand {
@@ -56,15 +57,15 @@ const AddBrandForm: React.FC<AddBrandFormProps> = ({
     // Upload images to S3
     const uploadImagesToS3 = async (files: File[]) => {
         const fileInfos = files.map(f => ({ fileName: f.name, fileType: f.type }));
-        const { data } = await axios.post(
-            "http://localhost:5000/api/s3/upload-brand-urls",
+        const { data } = await api.post(
+            "/api/s3/upload-brand-urls",
             { files: fileInfos }
         );
 
         const urls = data.urls; // [{ uploadUrl, imageUrl }]
         await Promise.all(
             files.map((file, index) =>
-                axios.put(urls[index].uploadUrl, file, {
+                api.put(urls[index].uploadUrl, file, {
                     headers: { "Content-Type": file.type },
                 })
             )
@@ -86,8 +87,8 @@ const AddBrandForm: React.FC<AddBrandFormProps> = ({
                 logo_url: uploadedUrls[0], // use logo_url to match backend
             };
 
-            const response = await axios.post(
-                "http://localhost:5000/api/brands/create-brand",
+            const response = await api.post(
+                "/api/brands/create-brand",
                 brandData,
                 { headers: { "Content-Type": "application/json" } }
             );

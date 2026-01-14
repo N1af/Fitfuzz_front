@@ -1,6 +1,7 @@
 import { useState, ChangeEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api"; // because AddProductForm is in src/components/seller/
+
 
 import {
   Card,
@@ -86,7 +87,7 @@ const SellerDashboard = () => {
   const fetchProducts = async () => {
     if (!sellerId) return;
     try {
-      const res = await axios.get(
+      const res = await api.get(
         `http://localhost:5000/api/seller-products/seller/${sellerId}`
       );
       setProducts(res.data.products || []);
@@ -102,7 +103,7 @@ const SellerDashboard = () => {
     if (!sellerId) return;
 
     try {
-      const res = await axios.get(
+      const res = await api.get(
         `http://localhost:5000/api/seller-orders/${sellerId}`
       );
 
@@ -134,8 +135,8 @@ const SellerDashboard = () => {
   ) => {
     if (!sellerId) return;
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/seller-products",
+      const res = await api.post(
+        "/api/seller-products",
         {
           ...newProduct,
           seller_id: sellerId,
@@ -158,7 +159,7 @@ const SellerDashboard = () => {
       return;
 
     try {
-      await axios.delete(
+      await api.delete(
         `http://localhost:5000/api/seller-products/${productId}/${sellerId}`
       );
       setProducts((prev) => prev.filter((p) => p.id !== productId));
