@@ -72,20 +72,20 @@ const ProductDetails = () => {
   /* ================= FETCH DATA ================= */
 
   useEffect(() => {
-    api.get(`http://localhost:5000/api/products/${id}`)
+    api.get(`/api/products/${id}`)
       .then(res => setProduct(res.data))
       .catch(console.error);
   }, [id]);
 
   useEffect(() => {
-    api.get(`http://localhost:5000/api/feedback/product/${id}`)
+    api.get(`/api/feedback/product/${id}`)
       .then(res => setFeedbacks(res.data))
       .catch(console.error);
   }, [id]);
 
   useEffect(() => {
     if (!userId) return;
-    api.get(`http://localhost:5000/api/locations/latest/${userId}`)
+    api.get(`/api/locations/latest/${userId}`)
       .then(res => setLatestLocation(res.data))
       .catch(console.error);
   }, [userId]);

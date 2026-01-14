@@ -35,7 +35,7 @@ export default function Brand() {
         if (!confirm("Are you sure you want to delete this brand?")) return;
 
         try {
-            await api.delete(`http://localhost:5000/api/brands/${id}`);
+            await api.delete(`/api/brands/${id}`);
             setBrands((prev) => prev.filter((b) => b.id !== id));
             toast.success("Brand deleted successfully!");
         } catch (err) {

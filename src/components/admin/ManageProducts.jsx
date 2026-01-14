@@ -26,7 +26,7 @@ const ManageProducts = () => {
   // ✅ Approve product
   const handleApprove = async (id) => {
     try {
-      await api.put(`http://localhost:5000/api/admin-products/${id}/approve`);
+      await api.put(`/api/admin-products/${id}/approve`);
       toast({ title: "✅ Product approved" });
       fetchProducts();
     } catch (err) {
@@ -38,7 +38,7 @@ const ManageProducts = () => {
   // ❌ Reject product
   const handleReject = async (id) => {
     try {
-      await api.put(`http://localhost:5000/api/admin-products/${id}/reject`);
+      await api.put(`/api/admin-products/${id}/reject`);
       toast({ title: "❌ Product rejected" });
       fetchProducts();
     } catch (err) {

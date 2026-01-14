@@ -31,7 +31,7 @@ const OrderDetails = () => {
     const fetchOrder = async () => {
       try {
         const res = await api.get(
-          `http://localhost:5000/api/seller-orders/order/${orderId}`
+          `/api/seller-orders/order/${orderId}`
         );
 
         const o = res.data.order;
@@ -64,7 +64,7 @@ const OrderDetails = () => {
 
     try {
       await api.put(
-        `http://localhost:5000/api/seller-orders/${order.id}/status`,
+        `/api/seller-orders/${order.id}/status`,
         { status: newStatus }
       );
 

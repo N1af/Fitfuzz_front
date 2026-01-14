@@ -100,7 +100,7 @@ const AddProductForm: React.FC<AddProductFormProps> = ({
 
     api
       .get(
-        `http://localhost:5000/api/products/subcategories/${form.category_id}`
+        `/api/products/subcategories/${form.category_id}`
       )
       .then((res) => setSubcategories(res.data))
       .catch(() => toast.error("Failed to load subcategories"));

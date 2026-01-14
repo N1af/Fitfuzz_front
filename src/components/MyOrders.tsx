@@ -74,7 +74,7 @@ export default function MyOrders() {
     setLoading(true);
     try {
       const res = await api.get(
-        `http://localhost:5000/api/orders/my-orders/${userId}`
+        `/api/orders/my-orders/${userId}`
       );
       setOrders(res.data || []);
     } catch (err) {
@@ -121,7 +121,7 @@ export default function MyOrders() {
   const markAsDelivered = async (orderId: number, productId: number) => {
     try {
       await api.put(
-        `http://localhost:5000/api/orders/mark-delivered`,
+        `/api/orders/mark-delivered`,
         { order_id: orderId, product_id: productId }
       );
       fetchOrders();

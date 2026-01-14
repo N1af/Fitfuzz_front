@@ -97,7 +97,7 @@ const Posters = () => {
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this poster?")) return;
     try {
-      await api.delete(`http://localhost:5000/api/posters/${id}`);
+      await api.delete(`/api/posters/${id}`);
       fetchPosters();
     } catch (err) {
       console.error("❌ Delete failed", err);

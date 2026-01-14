@@ -40,7 +40,7 @@ const LocationForm: FC<LocationFormProps> = ({ onClose, onSaved }) => {
   // Load districts
   useEffect(() => {
     if (!selectedProvince) return;
-    api.get(`http://localhost:5000/api/locations/districts/${selectedProvince}`)
+    api.get(`/api/locations/districts/${selectedProvince}`)
       .then(res => {
         setDistricts(res.data);
         setSelectedDistrict("");
@@ -53,7 +53,7 @@ const LocationForm: FC<LocationFormProps> = ({ onClose, onSaved }) => {
   // Load villages
   useEffect(() => {
     if (!selectedProvince || !selectedDistrict) return;
-    api.get(`http://localhost:5000/api/locations/villages/${selectedProvince}/${selectedDistrict}`)
+    api.get(`/api/locations/villages/${selectedProvince}/${selectedDistrict}`)
       .then(res => {
         setVillages(res.data);
         setSelectedVillage("");

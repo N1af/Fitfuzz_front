@@ -88,7 +88,7 @@ const SellerDashboard = () => {
     if (!sellerId) return;
     try {
       const res = await api.get(
-        `http://localhost:5000/api/seller-products/seller/${sellerId}`
+        `/api/seller-products/seller/${sellerId}`
       );
       setProducts(res.data.products || []);
     } catch (err) {
@@ -104,7 +104,7 @@ const SellerDashboard = () => {
 
     try {
       const res = await api.get(
-        `http://localhost:5000/api/seller-orders/${sellerId}`
+        `/api/seller-orders/${sellerId}`
       );
 
       const mappedOrders: Order[] = (res.data.orders || []).map((o: any) => ({
@@ -160,7 +160,7 @@ const SellerDashboard = () => {
 
     try {
       await api.delete(
-        `http://localhost:5000/api/seller-products/${productId}/${sellerId}`
+        `/api/seller-products/${productId}/${sellerId}`
       );
       setProducts((prev) => prev.filter((p) => p.id !== productId));
       alert("Product deleted successfully.");

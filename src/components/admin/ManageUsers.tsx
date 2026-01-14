@@ -56,7 +56,7 @@ const ManageUsers = () => {
   const handleSuspend = async (userId: number, name: string) => {
     try {
       const res = await api.patch(
-        `http://localhost:5000/api/admin/users/${userId}/suspend`
+        `/api/admin/users/${userId}/suspend`
       );
       toast.success(res.data.message);
 
@@ -76,7 +76,7 @@ const ManageUsers = () => {
     if (!confirm(`Are you sure you want to delete ${name}?`)) return;
     try {
       const res = await api.delete(
-        `http://localhost:5000/api/admin/users/${userId}`
+        `/api/admin/users/${userId}`
       );
       toast.success(res.data.message);
 

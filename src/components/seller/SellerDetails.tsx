@@ -38,7 +38,7 @@ const SellerDetails = ({ sellerId }: SellerDetailsProps) => {
       setError(null);
 
       try {
-        const res = await api.get(`http://localhost:5000/api/seller/${sellerId}`);
+        const res = await api.get(`/api/seller/${sellerId}`);
         if (isMounted) {
           setSellerDetails(res.data.seller);
         }

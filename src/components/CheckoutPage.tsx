@@ -37,7 +37,7 @@ const Checkout = () => {
     const fetchLatestLocation = async () => {
       try {
         const res = await api.get(
-          `http://localhost:5000/api/locations/latest/${user.id}`
+          `/api/locations/latest/${user.id}`
         );
         if (res.data) setLatestLocation(res.data);
       } catch (err) {
