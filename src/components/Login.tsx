@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import api from "@/api";
 
 const LoginPage = () => {
   const { user, login } = useAuth();
@@ -12,7 +13,6 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  
   useEffect(() => {
     if (user) {
       if (user.role === "admin") navigate("/admin-dashboard");
@@ -21,45 +21,35 @@ const LoginPage = () => {
   }, [user, navigate]);
 
   const handleLogin = async () => {
-  if (!email || !password) {
-    alert("Please enter your email and password");
-    return;
-  }
-
-  setLoading(true);
-  try {
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || "Invalid email or password");
+    if (!email || !password) {
+      alert("Please enter your email and password");
       return;
     }
 
-    // ✅ SAVE USER ID (THIS FIXES YOUR BUG)
-    localStorage.setItem("userId", String(data.user.id));
-    localStorage.setItem("role", data.user.role);
+    setLoading(true);
+    try {
+      const { data } = await api.post("/api/auth/login", { email, password });
 
-    // ✅ Save to AuthContext
-    login(data.user);
+      // Save user info
+      localStorage.setItem("userId", String(data.user.id));
+      localStorage.setItem("role", data.user.role);
 
-    // ✅ Redirect
-    if (data.user.role === "admin") navigate("/admin-dashboard");
-    else navigate("/profile");
+      // Save to AuthContext
+      login(data.user);
 
-  } catch (err) {
-    console.error("Login error:", err);
-    alert("Server error occurred. Please try again later.");
-  } finally {
-    setLoading(false);
-  }
-};
-
+      // Redirect
+      if (data.user.role === "admin") navigate("/admin-dashboard");
+      else navigate("/profile");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      alert(
+        err.response?.data?.message ||
+          "Server error occurred. Please try again later."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section className="py-20 bg-background min-h-screen flex items-center justify-center">
