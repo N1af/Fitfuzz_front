@@ -1,0 +1,434 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Slate Blue-Gray Design System */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    /* Core Theme Colors - Slate Blue-Gray inspired */
+    --background: 240 9% 98%;
+    --foreground: 210 11% 15%;
+
+    /* Primary Brand Colors - Slate Blue-Gray */
+    --primary: 210 15% 45%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 210 15% 40%;
+
+    /* Secondary Colors */  
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 210 11% 15%;
+
+    /* Accent Colors - Slate Blue-Gray variants */
+    --accent: 210 15% 45%;
+    --accent-foreground: 0 0% 100%;
+    --accent-hover: 210 15% 40%;
+
+    /* Muted Colors */
+    --muted: 240 5% 94%;
+    --muted-foreground: 215 16% 47%;
+
+    /* UI Element Colors */
+    --card: 0 0% 100%;
+    --card-foreground: 210 11% 15%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 11% 15%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 210 15% 45%;
+
+    /* Status Colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 48 96% 89%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --warning: 45 93% 47%;
+    --warning-foreground: 220 13% 18%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(220 13% 18%) 0%, hsl(220 13% 25%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(47 96% 89%) 0%, hsl(47 96% 85%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(220 13% 96%) 0%, hsl(0 0% 100%) 100%);
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(220 13% 18% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(220 13% 18% / 0.1), 0 2px 4px -1px hsl(220 13% 18% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(220 13% 18% / 0.1), 0 4px 6px -2px hsl(220 13% 18% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(220 13% 18% / 0.1), 0 10px 10px -5px hsl(220 13% 18% / 0.04);
+    
+    /* Animations */
+    --transition-base: all 0.2s ease-in-out;
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+    background: #ffffff;
+    min-height: 100vh;
+  }
+
+  /* Premium Adidas 3D Animations */
+  @keyframes adidasFloat {
+    0%, 100% { 
+      transform: translateY(0px) rotateX(5deg) rotateY(-10deg);
+    }
+    50% { 
+      transform: translateY(-20px) rotateX(-5deg) rotateY(10deg);
+    }
+  }
+
+  @keyframes adidasRotate {
+    0% { 
+      transform: translateY(0px) rotateX(5deg) rotateY(-10deg);
+    }
+    25% { 
+      transform: translateY(-10px) rotateX(-2deg) rotateY(5deg);
+    }
+    50% { 
+      transform: translateY(-20px) rotateX(-5deg) rotateY(10deg);
+    }
+    75% { 
+      transform: translateY(-10px) rotateX(-2deg) rotateY(5deg);
+    }
+    100% { 
+      transform: translateY(0px) rotateX(5deg) rotateY(-10deg);
+    }
+  }
+
+  @keyframes logoSlideIn {
+    0% { 
+      transform: translateY(-150px) scale(0.6) rotateX(30deg);
+      opacity: 0;
+    }
+    70% {
+      transform: translateY(10px) scale(1.05) rotateX(-5deg);
+      opacity: 1;
+    }
+    100% { 
+      transform: translateY(0px) scale(1) rotateX(5deg) rotateY(-10deg);
+      opacity: 1;
+    }
+  }
+
+  @keyframes adidasTextGlow {
+    0%, 100% {
+      text-shadow: 0 0 10px rgba(13, 71, 161, 0.3), 0 0 20px rgba(13, 71, 161, 0.2);
+    }
+    50% {
+      text-shadow: 0 0 20px rgba(13, 71, 161, 0.6), 0 0 40px rgba(13, 71, 161, 0.4);
+    }
+  }
+
+  @keyframes gradientShift {
+    0%, 100% { 
+      background: linear-gradient(180deg, #0d47a1 0%, #001f5c 100%);
+    }
+    33% {
+      background: linear-gradient(180deg, #1565c0 0%, #0d47a1 100%);
+    }
+    66% {
+      background: linear-gradient(180deg, #1976d2 0%, #1565c0 100%);
+    }
+  }
+
+  @keyframes shimmerBeam {
+    0% {
+      transform: translateX(-100%) translateY(-100%) rotate(45deg);
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(100vw) translateY(100vh) rotate(45deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes categorySlideUp {
+    0% {
+      transform: translateY(50px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .cloud-3d-container {
+    perspective: 1000px;
+  }
+
+  /* Gentle floating animation for cloud logo */
+  .gentle-float {
+    animation: gentleFloat 4s ease-in-out infinite;
+  }
+
+  @keyframes gentleFloat {
+    0%, 100% { 
+      transform: translateY(0px);
+    }
+    50% { 
+      transform: translateY(-15px);
+    }
+  }
+
+  .adidas-gradient-bg {
+    animation: gradientShift 12s ease-in-out infinite;
+  }
+
+  .adidas-text {
+    background: linear-gradient(135deg, #ffffff 0%, #e0f7ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: adidasTextGlow 3s ease-in-out infinite;
+  }
+
+  .text-fade-in {
+    animation: fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1) 0.8s forwards;
+    opacity: 0;
+  }
+
+  .category-bar {
+    background: rgba(0, 26, 64, 0.8);
+    backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(13, 71, 161, 0.3);
+  }
+
+  .category-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+
+  .category-item:hover {
+    color: #0d47a1;
+    text-shadow: 0 0 10px rgba(13, 71, 161, 0.8);
+    transform: translateY(-2px);
+  }
+
+  .category-1 { animation: categorySlideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 1.8s forwards; opacity: 0; }
+  .category-2 { animation: categorySlideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 2.0s forwards; opacity: 0; }
+  .category-3 { animation: categorySlideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 2.2s forwards; opacity: 0; }
+  .category-4 { animation: categorySlideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 2.4s forwards; opacity: 0; }
+  .category-5 { animation: categorySlideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 2.6s forwards; opacity: 0; }
+  .category-6 { animation: categorySlideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 2.8s forwards; opacity: 0; }
+
+  /* Gentle floating animation for cloud logo */
+  .gentle-float {
+    animation: gentleFloat 4s ease-in-out infinite;
+  }
+
+  @keyframes gentleFloat {
+    0%, 100% { 
+      transform: translateY(0px);
+    }
+    50% { 
+      transform: translateY(-15px);
+    }
+  }
+
+  /* Gradient HR Dividers */
+  .gradient-hr {
+    height: 2px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      #87ceeb 15%, 
+      #0d47a1 50%, 
+      #001f5c 85%, 
+      transparent 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gradient-hr::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.6) 50%, 
+      transparent 100%);
+    animation: shimmerHR 3s ease-in-out infinite;
+  }
+
+  @keyframes shimmerHR {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: -100%; }
+  }
+
+  /* Feature Cards */
+  .frosted-glass-feature {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    opacity: 0;
+    transform: translateY(50px);
+  }
+
+  .frosted-glass-feature:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(13, 71, 161, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), 
+                0 0 30px rgba(13, 71, 161, 0.3);
+    transform: translateY(-10px);
+  }
+
+  .feature-card {
+    transform: translateY(50px);
+    opacity: 0;
+    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium tracking-tight;
+  }
+}
+
+@layer components {
+  /* Hero Components */
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 
+           transition-[var(--transition-base)] shadow-[var(--shadow-sm)]
+           border-0 font-medium;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80
+           transition-[var(--transition-base)] shadow-[var(--shadow-sm)]
+           border border-border font-medium;
+  }
+
+  .btn-accent {
+    @apply bg-accent text-accent-foreground hover:bg-accent/80
+           transition-[var(--transition-base)] shadow-[var(--shadow-sm)]
+           border-0 font-medium;
+  }
+
+  /* Card Components */
+  .card-elevated {
+    @apply bg-card border border-border shadow-[var(--shadow-md)] 
+           rounded-lg transition-[var(--transition-smooth)]
+           hover:shadow-[var(--shadow-lg)];
+  }
+
+  .product-card {
+    @apply card-elevated hover:-translate-y-1 cursor-pointer;
+  }
+
+  /* Layout Components */
+  .container-fluid {
+    @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+  }
+
+  .section-padding {
+    @apply py-12 lg:py-16;
+  }
+
+  /* Text Styles */
+  .text-hero {
+    @apply text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight;
+  }
+
+  .text-section {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight;
+  }
+
+  .text-subtitle {
+    @apply text-lg sm:text-xl text-muted-foreground leading-relaxed;
+  }
+}
