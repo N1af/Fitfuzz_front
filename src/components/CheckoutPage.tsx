@@ -114,150 +114,164 @@ const Checkout = () => {
     fetchLatestLocation();
   }, [user]);
 
-  // Extract product ID from cart item
+  // FIXED: Safe extraction of product ID from cart item
   const extractProductId = (item: CartItem): number => {
-    // Try different methods to get product ID:
     // 1. If item has productId field (from cart)
     if (item.productId) {
       return Number(item.productId);
     }
 
     // 2. Try to extract from composite ID (format: productId-colorId-sizeId)
-    const productIdMatch = item.id.match(/^(\d+)/);
-    if (productIdMatch) {
-      return Number(productIdMatch[1]);
+    // Check if id is a string before using match
+    if (typeof item.id === 'string') {
+      const productIdMatch = item.id.match(/^(\d+)/);
+      if (productIdMatch) {
+        return Number(productIdMatch[1]);
+      }
     }
 
-    // 3. Fallback to item.id if it's a simple number
-    return Number(item.id);
+    // 3. Try to convert the entire id to a number
+    const numericId = Number(item.id);
+    if (!isNaN(numericId)) {
+      return numericId;
+    }
+
+    // 4. Fallback - log error and return 0
+    console.error("Could not extract product ID from item:", item);
+    return 0;
   };
 
   // Place order handler
-  // In your handlePlaceOrder function, add this detailed logging:
-const handlePlaceOrder = async () => {
-  if (items.length === 0) return alert("Your cart is empty!");
-  if (!latestLocation)
-    return alert("Please select a delivery location first!");
+  const handlePlaceOrder = async () => {
+    if (items.length === 0) return alert("Your cart is empty!");
+    if (!latestLocation)
+      return alert("Please select a delivery location first!");
 
-  setIsPlacingOrder(true);
+    setIsPlacingOrder(true);
 
-  console.log("=== DEBUG: Cart Items Before Processing ===");
-  items.forEach((item, index) => {
-    console.log(`Item ${index + 1}:`, {
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity,
-      seller_id: item.seller_id,
-      selectedColorId: item.selectedColorId,
-      selectedColorName: item.selectedColorName,
-      selectedSizeId: item.selectedSizeId,
-      selectedSizeName: item.selectedSizeName,
-      // Check if these exist
-      hasSelectedColorId: item.selectedColorId !== undefined,
-      hasSelectedSizeId: item.selectedSizeId !== undefined,
-      colorIdType: typeof item.selectedColorId,
-      sizeIdType: typeof item.selectedSizeId,
-    });
-  });
-
-  try {
-    // Map items for backend
-    const itemsWithSeller = items.map((item: CartItem) => {
-      // Extract product ID from cart item
-      const productId = extractProductId(item);
-      
-      // Convert color and size IDs - handle different possible formats
-      let colorId = null;
-      let sizeId = null;
-      
-      // Handle color_id - try multiple ways to get it
-      if (item.selectedColorId !== undefined && item.selectedColorId !== null) {
-        if (typeof item.selectedColorId === 'number') {
-          colorId = item.selectedColorId;
-        } else if (typeof item.selectedColorId === 'string' && item.selectedColorId.trim() !== '') {
-          colorId = parseInt(item.selectedColorId);
-        }
-      }
-      
-      // Handle size_id - try multiple ways to get it
-      if (item.selectedSizeId !== undefined && item.selectedSizeId !== null) {
-        if (typeof item.selectedSizeId === 'number') {
-          sizeId = item.selectedSizeId;
-        } else if (typeof item.selectedSizeId === 'string' && item.selectedSizeId.trim() !== '') {
-          sizeId = parseInt(item.selectedSizeId);
-        }
-      }
-      
-      console.log("Processed item for backend:", {
-        product_id: productId,
-        quantity: item.quantity,
+    console.log("=== DEBUG: Cart Items Before Processing ===");
+    items.forEach((item, index) => {
+      console.log(`Item ${index + 1}:`, {
+        id: item.id,
+        name: item.name,
         price: item.price,
+        quantity: item.quantity,
         seller_id: item.seller_id,
-        color_id: colorId,
-        size_id: sizeId,
-        originalColorId: item.selectedColorId,
-        originalSizeId: item.selectedSizeId,
+        selectedColorId: item.selectedColorId,
+        selectedColorName: item.selectedColorName,
+        selectedSizeId: item.selectedSizeId,
+        selectedSizeName: item.selectedSizeName,
+        hasSelectedColorId: item.selectedColorId !== undefined,
+        hasSelectedSizeId: item.selectedSizeId !== undefined,
+        colorIdType: typeof item.selectedColorId,
+        sizeIdType: typeof item.selectedSizeId,
+      });
+    });
+
+    try {
+      // Map items for backend
+      const itemsWithSeller = items.map((item: CartItem) => {
+        // Extract product ID from cart item
+        const productId = extractProductId(item);
+        
+        // Convert color and size IDs - handle different possible formats
+        let colorId = null;
+        let sizeId = null;
+        
+        // Handle color_id - try multiple ways to get it
+        if (item.selectedColorId !== undefined && item.selectedColorId !== null) {
+          if (typeof item.selectedColorId === 'number') {
+            colorId = item.selectedColorId;
+          } else if (typeof item.selectedColorId === 'string' && item.selectedColorId.trim() !== '') {
+            const parsedColorId = parseInt(item.selectedColorId);
+            colorId = isNaN(parsedColorId) ? null : parsedColorId;
+          }
+        }
+        
+        // Handle size_id - try multiple ways to get it
+        if (item.selectedSizeId !== undefined && item.selectedSizeId !== null) {
+          if (typeof item.selectedSizeId === 'number') {
+            sizeId = item.selectedSizeId;
+          } else if (typeof item.selectedSizeId === 'string' && item.selectedSizeId.trim() !== '') {
+            const parsedSizeId = parseInt(item.selectedSizeId);
+            sizeId = isNaN(parsedSizeId) ? null : parsedSizeId;
+          }
+        }
+        
+        console.log("Processed item for backend:", {
+          product_id: productId,
+          quantity: item.quantity,
+          price: item.price,
+          seller_id: item.seller_id,
+          color_id: colorId,
+          size_id: sizeId,
+          originalColorId: item.selectedColorId,
+          originalSizeId: item.selectedSizeId,
+        });
+
+        return {
+          product_id: Number(productId),
+          quantity: Number(item.quantity ?? 1),
+          price: Number(item.price),
+          seller_id: Number(item.seller_id),
+          color_id: colorId,
+          size_id: sizeId,
+        };
       });
 
-      return {
-        product_id: Number(productId),
-        quantity: Number(item.quantity ?? 1),
-        price: Number(item.price),
-        seller_id: Number(item.seller_id),
-        color_id: colorId,
-        size_id: sizeId,
-      };
-    });
+      console.log("=== DEBUG: Data being sent to backend ===", {
+        user_id: user!.id,
+        location_id: latestLocation.id,
+        items: itemsWithSeller,
+        total: Number(grandTotal),
+        payment_method: paymentMethod,
+      });
 
-    console.log("=== DEBUG: Data being sent to backend ===", {
-      user_id: user!.id,
-      location_id: latestLocation.id,
-      items: itemsWithSeller,
-      total: Number(grandTotal),
-      payment_method: paymentMethod,
-    });
+      const response = await api.post("/api/checkout", {
+        user_id: user!.id,
+        location_id: latestLocation.id,
+        items: itemsWithSeller,
+        total: Number(grandTotal),
+        payment_method: paymentMethod,
+      });
 
-    const response = await api.post("/api/checkout", {
-      user_id: user!.id,
-      location_id: latestLocation.id,
-      items: itemsWithSeller,
-      total: Number(grandTotal),
-      payment_method: paymentMethod,
-    });
-
-    if (response.data.success) {
-      alert(
-        `✅ Order placed successfully! Tracking ID: ${response.data.tracking_id}\nYou will be redirected to home page.`,
-      );
-      clearCart();
-      navigate("/");
-    } else {
-      alert("❌ Failed to place order: " + (response.data.error || "Unknown error"));
+      if (response.data.success) {
+        alert(
+          `✅ Order placed successfully! Tracking ID: ${response.data.tracking_id}\nYou will be redirected to home page.`,
+        );
+        clearCart();
+        navigate("/");
+      } else {
+        alert("❌ Failed to place order: " + (response.data.error || "Unknown error"));
+      }
+    } catch (error: any) {
+      console.error("❌ Error placing order:", error);
+      console.error("Full error details:", error.response?.data);
+      
+      let errorMessage = "Failed to place order. Please try again.";
+      if (error.response?.data?.details) {
+        errorMessage = error.response.data.details;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(`❌ ${errorMessage}`);
+    } finally {
+      setIsPlacingOrder(false);
     }
-  } catch (error: any) {
-    console.error("❌ Error placing order:", error);
-    console.error("Full error details:", error.response?.data);
-    
-    let errorMessage = "Failed to place order. Please try again.";
-    if (error.response?.data?.details) {
-      errorMessage = error.response.data.details;
-    } else if (error.response?.data?.error) {
-      errorMessage = error.response.data.error;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-    
-    alert(`❌ ${errorMessage}`);
-  } finally {
-    setIsPlacingOrder(false);
-  }
-};
+  };
 
   // Navigate to product details
   const goToProductDetails = (item: CartItem) => {
     const productId = extractProductId(item);
-    navigate(`/product/${productId}`);
+    if (productId && productId !== 0) {
+      navigate(`/product/${productId}`);
+    } else {
+      console.error("Cannot navigate: Invalid product ID", item);
+      alert("Cannot view product details: Invalid product ID");
+    }
   };
 
   return (

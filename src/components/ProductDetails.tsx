@@ -10,7 +10,7 @@ import {
   Shield,
   RotateCcw,
   ChevronRight,
-  ImagePlus,
+  Upload,
   CheckCircle,
   Package,
   Clock,
@@ -18,7 +18,6 @@ import {
   MessageSquare,
   ChevronLeft,
   ChevronDown,
-  Upload,
   X,
 } from "lucide-react";
 import api from "../api";
@@ -73,11 +72,6 @@ interface Feedback {
 interface UserLocation extends LocationData {
   id: number;
   delivery_charge: number;
-}
-
-interface ChatBoxProps {
-  sellerId: number | string;
-  onClose: () => void;
 }
 
 /* ================= COMPONENT ================= */
@@ -251,8 +245,22 @@ const ProductDetails = () => {
 
   /* ================= HANDLERS ================= */
 
+  // FIXED: Authentication check with redirect path saving
+  const checkAuthAndRedirect = (destination: string) => {
+    if (!user) {
+      // Save the intended destination before redirecting to login
+      localStorage.setItem('redirectAfterLogin', destination);
+      navigate('/login');
+      return false;
+    }
+    return true;
+  };
+
   const addToCart = () => {
     if (!product) return;
+
+    // Check authentication first
+    if (!checkAuthAndRedirect('/cart')) return;
 
     if (selectedColorId === null || selectedColorId === undefined) {
       alert("Please select a color");
@@ -293,18 +301,57 @@ const ProductDetails = () => {
   };
 
   const handleBuyNow = () => {
-    addToCart();
+    if (!product) return;
+
+    // Check authentication first
+    if (!checkAuthAndRedirect('/checkout')) return;
+
+    if (selectedColorId === null || selectedColorId === undefined) {
+      alert("Please select a color");
+      return;
+    }
+
+    if (selectedSizeId === null || selectedSizeId === undefined) {
+      alert("Please select a size");
+      return;
+    }
+
+    const selectedColor = colors.find((c) => c.id === selectedColorId);
+    const selectedSize = sizes.find((s) => s.id === selectedSizeId);
+
+    if (!selectedColor || !selectedSize) {
+      alert("Selected option not available");
+      return;
+    }
+
+    // Create a unique ID for this variant
+    const cartItemId = `${product.id}-${selectedColorId}-${selectedSizeId}`;
+
+    addItem({
+      id: cartItemId,
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      image_url: product.image_url,
+      seller_id: String(product.seller_id),
+      quantity,
+      selectedColorId,
+      selectedColorName: selectedColor.name,
+      selectedSizeId,
+      selectedSizeName: selectedSize.name,
+    });
+    
     navigate("/checkout");
   };
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
     if (loading) return;
-    if (!user) {
-      navigate("/login");
-      return;
-    }
+    
+    // Check authentication first
+    if (!checkAuthAndRedirect(window.location.pathname)) return;
 
     if (!product) return;
 
@@ -322,9 +369,15 @@ const ProductDetails = () => {
     }
   };
 
+  const handleChatWithSeller = () => {
+    if (!checkAuthAndRedirect(window.location.pathname)) return;
+    setShowChat(true);
+  };
+
   /* ===== SUBMIT REVIEW ===== */
   const submitReview = async () => {
-    if (!userId) return alert("Login required");
+    if (!checkAuthAndRedirect(window.location.pathname)) return;
+    
     if (!reviewComment.trim()) return alert("Please write a review");
 
     let imageUrls: string[] = [];
@@ -374,7 +427,7 @@ const ProductDetails = () => {
   };
 
   const handleDeleteReview = async (reviewId: number) => {
-    if (!userId) return;
+    if (!checkAuthAndRedirect(window.location.pathname)) return;
 
     const confirmDelete = window.confirm("Delete this review?");
     if (!confirmDelete) return;
@@ -394,7 +447,8 @@ const ProductDetails = () => {
   };
 
   const saveLocation = async (data: LocationData) => {
-    if (!userId) return;
+    if (!checkAuthAndRedirect(window.location.pathname)) return;
+    
     try {
       const res = await api.post("/api/locations", {
         ...data,
@@ -876,7 +930,10 @@ const ProductDetails = () => {
                       </div>
                       
                       <Button
-                        onClick={() => setShowReviewForm(true)}
+                        onClick={() => {
+                          if (!checkAuthAndRedirect(window.location.pathname)) return;
+                          setShowReviewForm(true);
+                        }}
                         className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
                       >
                         <MessageSquare className="mr-2 h-4 w-4" />
@@ -1153,7 +1210,10 @@ const ProductDetails = () => {
               )}
 
               <Button
-                onClick={() => setShowLocationForm(true)}
+                onClick={() => {
+                  if (!checkAuthAndRedirect(window.location.pathname)) return;
+                  setShowLocationForm(true);
+                }}
                 className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white"
               >
                 {latestLocation ? "Update Location" : "Add Delivery Location"}
@@ -1188,13 +1248,7 @@ const ProductDetails = () => {
               </div>
 
               <Button
-                onClick={() => {
-                  if (!user) {
-                    navigate("/login");
-                    return;
-                  }
-                  setShowChat(true);
-                }}
+                onClick={handleChatWithSeller}
                 className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
               >
                 <MessageSquare className="mr-2 h-4 w-4" />

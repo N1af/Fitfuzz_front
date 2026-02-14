@@ -15,8 +15,17 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (user) {
-      if (user.role === "admin") navigate("/admin-dashboard");
-      else navigate("/profile");
+      // Check if there's a saved redirect path
+      const redirectPath = localStorage.getItem('redirectAfterLogin');
+      
+      if (redirectPath) {
+        localStorage.removeItem('redirectAfterLogin');
+        navigate(redirectPath);
+      } else {
+        // Default redirect based on role
+        if (user.role === "admin") navigate("/admin-dashboard");
+        else navigate("/profile");
+      }
     }
   }, [user, navigate]);
 
@@ -37,9 +46,9 @@ const LoginPage = () => {
       // Save to AuthContext
       login(data.user);
 
-      // Redirect
-      if (data.user.role === "admin") navigate("/admin-dashboard");
-      else navigate("/profile");
+      // Don't navigate here - let the useEffect handle it
+      // This ensures the redirect path is checked
+      
     } catch (err: any) {
       console.error("Login error:", err);
       alert(
@@ -90,7 +99,7 @@ const LoginPage = () => {
               </Button>
 
               <p className="text-sm text-center text-muted-foreground mt-3">
-                Don’t have an account?{" "}
+                Don't have an account?{" "}
                 <span
                   onClick={() => navigate("/create-account")}
                   className="text-accent font-medium hover:underline cursor-pointer"
