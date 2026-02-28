@@ -1,6 +1,5 @@
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Mail, Instagram, Linkedin, MessageCircle } from "lucide-react";
+import { FaTiktok } from "react-icons/fa";
 import cloudLogo from "@/assets/cloud-logo1.png";
 
 const Footer = () => {
@@ -32,14 +31,6 @@ const Footer = () => {
           </p>
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm text-white/90">
-              <MapPin className="h-4 w-4" />
-              <span>123 Commerce St, City, State 12345</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-white/90">
-              <Phone className="h-4 w-4" />
-              <span>+1 (555) 123-4567</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-white/90">
               <Mail className="h-4 w-4" />
               <span>hello@fitfuzz.com</span>
             </div>
@@ -52,11 +43,8 @@ const Footer = () => {
           <nav className="flex flex-col space-y-2">
             {[
               "About Us",
-              "Contact",
               "Privacy Policy",
               "Terms of Service",
-              "Shipping Info",
-              "Returns & Exchanges",
             ].map((link) => (
               <a
                 key={link}
@@ -74,12 +62,8 @@ const Footer = () => {
           <h4 className="text-lg font-semibold text-white">Customer Service</h4>
           <nav className="flex flex-col space-y-2">
             {[
-              "Help Center",
               "Track Your Order",
               "Size Guide",
-              "Care Instructions",
-              "Gift Cards",
-              "Wholesale",
             ].map((service) => (
               <a
                 key={service}
@@ -122,18 +106,18 @@ const Footer = () => {
           {/* Social Media Icons */}
           <div className="flex items-center gap-3">
             {[
-              { icon: Facebook, href: "#", label: "Facebook" },
-              { icon: Twitter, href: "#", label: "Twitter" },
               { icon: Instagram, href: "#", label: "Instagram" },
-              { icon: Youtube, href: "#", label: "YouTube" },
-            ].map(({ icon: Icon, href, label }) => (
+              { icon: Linkedin, href: "#", label: "LinkedIn" },
+              { icon: FaTiktok, href: "#", label: "TikTok", isCustom: true },
+              { icon: MessageCircle, href: "#", label: "WhatsApp" },
+            ].map(({ icon: Icon, href, label, isCustom }) => (
               <a
                 key={label}
                 href={href}
                 aria-label={label}
                 className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-white"
               >
-                <Icon className="w-5 h-5" />
+                {isCustom ? <Icon className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
               </a>
             ))}
           </div>

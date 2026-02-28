@@ -9,6 +9,9 @@ import {
   Clock,
   Leaf,
   X,
+  Tag,
+  Gift,
+  ChevronRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
@@ -137,6 +140,66 @@ const Features = () => {
               </div>
             </motion.div>
           ))}
+        </div>
+
+        {/* PROMO SECTION */}
+        <div className="mt-16 md:mt-20">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl overflow-hidden shadow-xl">
+            <div className="grid grid-cols-1 lg:grid-cols-2">
+              {/* Left Content */}
+              <div className="p-8 md:p-12 text-white">
+                <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full mb-6">
+                  <Tag className="w-4 h-4" />
+                  <span className="text-sm font-medium">Limited Time Offer</span>
+                </div>
+                
+                <h3 className="text-3xl md:text-4xl font-bold mb-4">
+                  Get 20% Off Your First Order
+                </h3>
+                
+                <p className="text-blue-100 mb-6 text-lg">
+                  Sign up now and receive exclusive discounts, early access to new collections, and personalized style recommendations.
+                </p>
+                
+                <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                  <div className="flex items-center gap-2">
+                    <Gift className="w-5 h-5 text-blue-200" />
+                    <span className="text-sm">Free Shipping</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RotateCcw className="w-5 h-5 text-blue-200" />
+                    <span className="text-sm">30-Day Returns</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-blue-200" />
+                    <span className="text-sm">Secure Checkout</span>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <input
+                    type="email"
+                    placeholder="Enter your email"
+                    className="flex-1 px-4 py-3 rounded-lg text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  />
+                  <button className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 group">
+                    Claim Offer
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+                
+                <p className="text-xs text-blue-200 mt-4">
+                  *Terms and conditions apply. Offer valid for new customers only.
+                </p>
+              </div>
+              
+              {/* Right Image/Graphic */}
+              <div className="hidden lg:block relative bg-blue-500">
+                <div className="absolute inset-0 bg-gradient-to-l from-blue-400 to-transparent"></div>
+                <div className="h-full w-full bg-[url('https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center mix-blend-overlay"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import cloudLogo from "@/assets/cloud-logo2.png";
+import cloudLogo from "@/assets/cloud-logo3.png";
 
 const Hero = () => {
   return (
@@ -18,7 +18,7 @@ const Hero = () => {
           <img
             src={cloudLogo}
             alt="Fitfuzz Cloud Logo"
-            className="gentle-float mx-auto max-w-full h-auto md:max-w-lg"
+            className="cloud-float mx-auto max-w-full h-auto md:max-w-lg"
           />
         </div>
 
@@ -27,11 +27,38 @@ const Hero = () => {
           <h1 className="text-6xl md:text-8xl font-brand font-bold text-white tracking-tight leading-none">
             Fitfuzz Store
           </h1>
-          <p className="text-xl md:text-2xl font-light text-white/90 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl font-light text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] leading-relaxed max-w-2xl mx-auto">
             All under one cloud.
           </p>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes cloudFloat {
+          0% {
+            transform: translate(0px, 0px);
+          }
+          20% {
+            transform: translate(15px, -15px);
+          }
+          40% {
+            transform: translate(-10px, -25px);
+          }
+          60% {
+            transform: translate(-25px, -10px);
+          }
+          80% {
+            transform: translate(20px, -5px);
+          }
+          100% {
+            transform: translate(0px, 0px);
+          }
+        }
+
+        .cloud-float {
+          animation: cloudFloat 12s ease-in-out infinite;
+        }
+      `}</style>
     </section>
   );
 };

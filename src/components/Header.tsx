@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   ShoppingCart,
@@ -10,10 +10,11 @@ import {
   ChevronDown,
   Heart,
   ShoppingBag,
+  Compass,
 } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 const Header = () => {
@@ -41,10 +42,14 @@ const Header = () => {
   } = useWishlist();
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout, seller, sellerLogout } = useAuth();
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalWishlist = user ? wishlistItems.length : 0;
+
+  // Check if current page is home page
+  const isHomePage = location.pathname === "/";
 
   /* CLOSE WISHLIST ON LOGOUT */
   useEffect(() => {
@@ -58,18 +63,26 @@ const Header = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /* SEARCH FUNCTION - FIXED */
+  /* SEARCH FUNCTION */
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    
+
     if (!searchQuery.trim()) {
       setIsSearchOpen(false);
       return;
     }
-    
+
     try {
       setIsSearching(true);
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+
+      // Build search params
+      const params = new URLSearchParams();
+      params.append("q", searchQuery);
+
+      // Navigate to search page
+      navigate(`/search?${params.toString()}`);
+
+      // Close panels and reset
       setSearchQuery("");
       setIsSearchOpen(false);
     } catch (error) {
@@ -126,83 +139,142 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
+  // Determine header styles based on page and scroll position
+  const getHeaderClasses = () => {
+    if (isHomePage && !scrolled) {
+      // Home page, not scrolled - transparent with white text
+      return "fixed top-0 w-full z-50 transition-all py-4 bg-transparent";
+    } else {
+      // Other pages OR scrolled - white background with blue text
+      return `fixed top-0 w-full z-50 transition-all ${
+        scrolled ? "py-3 shadow-lg" : "py-4 shadow-md"
+      } bg-white`;
+    }
+  };
+
+  // Determine text color for links and icons
+  const getTextColor = (baseClass: string) => {
+    if (isHomePage && !scrolled) {
+      return `${baseClass} text-white hover:bg-white/20`;
+    } else {
+      return `${baseClass} text-gray-700 hover:text-blue-600 hover:bg-blue-50`;
+    }
+  };
+
+  // Determine logo color
+  const getLogoColor = () => {
+    if (isHomePage && !scrolled) {
+      return "text-white cursor-pointer hover:opacity-80 transition-colors";
+    } else {
+      return "text-blue-600 cursor-pointer hover:text-blue-700 transition-colors";
+    }
+  };
+
+  // Determine search input styles
+  const getSearchInputClasses = () => {
+    if (isHomePage && !scrolled) {
+      return "w-48 lg:w-64 xl:w-80 pl-9 pr-4 py-2 text-sm border border-white/30 bg-white/10 text-white placeholder:text-white/70 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all";
+    } else {
+      return "w-48 lg:w-64 xl:w-80 pl-9 pr-4 py-2 text-sm border border-gray-300 bg-white text-gray-900 placeholder:text-gray-400 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all";
+    }
+  };
+
+  // Determine search icon color
+  const getSearchIconColor = () => {
+    return isHomePage && !scrolled ? "text-white/70" : "text-gray-400";
+  };
+
   return (
     <>
-      {/* HEADER - REMOVED ANNOUNCEMENT BAR */}
-      <header
-        className={`fixed top-0 w-full z-50 bg-white transition-all ${scrolled ? "py-3 shadow-lg" : "py-4 shadow-md"}`}
-      >
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+      {/* HEADER */}
+      <header className={getHeaderClasses()}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center">
           {/* Logo */}
           <div
             onClick={() => navigate("/")}
-            className="text-2xl md:text-3xl font-bold tracking-tight text-blue-600 cursor-pointer hover:text-blue-700 transition-colors"
+            className={`text-xl sm:text-2xl md:text-3xl font-bold tracking-tight whitespace-nowrap ${getLogoColor()}`}
           >
             Fitfuzz
           </div>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            <button onClick={() => navigate("/")} className={navLink}>
+          {/* Desktop Nav - Hidden on mobile */}
+          <nav className="hidden md:flex items-center gap-4 lg:gap-8">
+            <button 
+              onClick={() => navigate("/")} 
+              className={getTextColor(navLink)}
+            >
               Home
             </button>
-            <button onClick={() => navigate("/men")} className={navLink}>
+            <button 
+              onClick={() => navigate("/explore")} 
+              className={getTextColor(navLink)}
+            >
+              <Compass className="h-4 w-4 inline mr-1" />
+              Explore
+            </button>
+            <button 
+              onClick={() => navigate("/men")} 
+              className={getTextColor(navLink)}
+            >
               Men
             </button>
-            <button onClick={() => navigate("/women")} className={navLink}>
+            <button 
+              onClick={() => navigate("/women")} 
+              className={getTextColor(navLink)}
+            >
               Women
             </button>
-            <button onClick={() => navigate("/sale")} className={navLink}>
+            <button 
+              onClick={() => navigate("/sale")} 
+              className={getTextColor(navLink)}
+            >
               Sale
             </button>
-
-            {!seller && (
-              <button
-                onClick={() => navigate("/seller-login")}
-                className="border border-gray-300 px-4 py-2 rounded-full text-gray-700 hover:bg-gray-100 transition-colors text-sm font-medium"
-              >
-                Become a Seller
-              </button>
-            )}
           </nav>
 
           {/* RIGHT ACTIONS */}
-          <div className="flex items-center gap-4">
-            {/* SEARCH - FIXED */}
-            <div ref={searchRef} className="relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                className={`${iconBtn} md:hidden`}
-                onClick={() => setIsSearchOpen(!isSearchOpen)}
-              >
-                <Search className="h-5 w-5" />
-              </Button>
-
-              {/* Desktop Search - FIXED */}
-              <div className="hidden md:block relative">
-                <form
-                  onSubmit={handleSearch}
-                  className="relative"
-                >
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-4">
+            {/* SEARCH - Desktop */}
+            <div ref={searchRef} className="hidden md:block relative">
+              <div className="relative">
+                <form onSubmit={handleSearch} className="relative">
                   <input
                     ref={searchInputRef}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="w-48 lg:w-64 pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className={getSearchInputClasses()}
                     placeholder="Search products..."
                   />
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 ${getSearchIconColor()}`} />
                 </form>
               </div>
+            </div>
 
-              {/* Mobile Search Panel - FIXED */}
+            {/* SEARCH - Mobile Icon */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`${iconBtn} md:hidden ${
+                isHomePage && !scrolled ? "text-white hover:bg-white/20" : "text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+              }`}
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+
+            {/* Mobile Search Panel */}
+            <AnimatePresence>
               {isSearchOpen && (
-                <div className="fixed top-0 left-0 right-0 bg-white shadow-lg z-50 p-4 md:hidden">
-                  <div className="flex items-center gap-2">
-                    <form onSubmit={handleSearch} className="flex-1">
-                      <div className="relative">
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="fixed top-0 left-0 right-0 bg-white shadow-lg z-50 p-4 md:hidden"
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex-1 relative">
+                      <form onSubmit={handleSearch}>
                         <input
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
@@ -213,8 +285,8 @@ const Header = () => {
                           autoFocus
                         />
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      </div>
-                    </form>
+                      </form>
+                    </div>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -223,51 +295,69 @@ const Header = () => {
                       <X className="h-5 w-5" />
                     </Button>
                   </div>
-                  
-                  {/* Search Suggestions - FIXED */}
+
+                  {/* Search Suggestions */}
                   {searchQuery && (
-                    <div className="mt-4">
-                      <div className="space-y-2">
-                        <button
-                          onClick={() => {
-                            setSearchQuery("men clothing");
-                            handleSearch();
-                          }}
-                          className="text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 p-2 rounded w-full text-left"
-                        >
-                          Search "men clothing"
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSearchQuery("women dress");
-                            handleSearch();
-                          }}
-                          className="text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 p-2 rounded w-full text-left"
-                        >
-                          Search "women dress"
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSearchQuery("sale");
-                            handleSearch();
-                          }}
-                          className="text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 p-2 rounded w-full text-left"
-                        >
-                          Search "sale"
-                        </button>
-                      </div>
-                    </div>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="space-y-2"
+                    >
+                      <p className="text-xs text-gray-500 font-medium mb-2">
+                        Suggestions
+                      </p>
+                      <button
+                        onClick={() => {
+                          setSearchQuery("men clothing");
+                          handleSearch();
+                        }}
+                        className="text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 p-2 rounded w-full text-left"
+                      >
+                        Search "men clothing"
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSearchQuery("women dress");
+                          handleSearch();
+                        }}
+                        className="text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 p-2 rounded w-full text-left"
+                      >
+                        Search "women dress"
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSearchQuery("sale");
+                          handleSearch();
+                        }}
+                        className="text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 p-2 rounded w-full text-left"
+                      >
+                        Search "sale"
+                      </button>
+                    </motion.div>
                   )}
-                </div>
+
+                  {/* Search Button */}
+                  <div className="mt-4">
+                    <Button
+                      onClick={handleSearch}
+                      disabled={!searchQuery.trim() || isSearching}
+                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                    >
+                      {isSearching ? "Searching..." : "Search"}
+                    </Button>
+                  </div>
+                </motion.div>
               )}
-            </div>
+            </AnimatePresence>
 
             {/* WISHLIST */}
             <div ref={wishlistRef} className="relative">
               <Button
                 variant="ghost"
                 size="icon"
-                className={`${iconBtn} relative`}
+                className={`${iconBtn} relative ${
+                  isHomePage && !scrolled ? "text-white hover:bg-white/20" : "text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                }`}
                 onClick={() => {
                   if (!user) {
                     navigate("/login");
@@ -300,7 +390,9 @@ const Header = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className={`${iconBtn} relative`}
+                className={`${iconBtn} relative ${
+                  isHomePage && !scrolled ? "text-white hover:bg-white/20" : "text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                }`}
                 onClick={() => setIsCartOpen(!isCartOpen)}
               >
                 <ShoppingCart className="h-5 w-5" />
@@ -325,16 +417,18 @@ const Header = () => {
             </div>
 
             {/* ACCOUNT */}
-            <div ref={accountRef} className="relative">
+            <div ref={accountRef} className="relative hidden sm:block">
               <Button
                 variant="ghost"
-                className={`${iconBtn} px-3`}
+                className={`${iconBtn} px-2 lg:px-3 ${
+                  isHomePage && !scrolled ? "text-white hover:bg-white/20" : "text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                }`}
                 onClick={() => setIsAccountsOpen(!isAccountsOpen)}
               >
-                <User className="h-5 w-5 mr-1" />
-                <ChevronDown
-                  className={`ml-1 h-4 w-4 transition ${isAccountsOpen ? "rotate-180" : ""}`}
-                />
+                <User className="h-5 w-5 sm:mr-1" />
+                <ChevronDown className={`hidden sm:inline ml-1 h-4 w-4 transition ${
+                  isHomePage && !scrolled ? "text-white" : "text-gray-700"
+                }`} />
               </Button>
 
               {isAccountsOpen && (
@@ -342,8 +436,12 @@ const Header = () => {
                   {seller ? (
                     <>
                       <div className="p-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
-                        <p className="text-sm font-medium text-gray-900">Seller Account</p>
-                        <p className="text-xs text-gray-600 truncate">Welcome back!</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          Seller Account
+                        </p>
+                        <p className="text-xs text-gray-600 truncate">
+                          Welcome back!
+                        </p>
                       </div>
                       <button
                         className={`${dropdownItem} hover:bg-blue-50 hover:text-blue-600`}
@@ -355,7 +453,7 @@ const Header = () => {
                         <ShoppingBag className="h-4 w-4 mr-2" />
                         Seller Dashboard
                       </button>
-                      <button 
+                      <button
                         className={`${dropdownItem} hover:bg-red-50 hover:text-red-600`}
                         onClick={() => {
                           sellerLogout();
@@ -368,8 +466,12 @@ const Header = () => {
                   ) : user ? (
                     <>
                       <div className="p-3 border-b bg-gradient-to-r from-gray-50 to-blue-50">
-                        <p className="text-sm font-medium text-gray-900">My Account</p>
-                        <p className="text-xs text-gray-600">Welcome, {user.name || user.email}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          My Account
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          Welcome, {user.name || user.email}
+                        </p>
                       </div>
                       <button
                         className={`${dropdownItem} hover:bg-blue-50 hover:text-blue-600`}
@@ -399,7 +501,7 @@ const Header = () => {
                         Wishlist
                       </button>
                       <div className="border-t">
-                        <button 
+                        <button
                           className={`${dropdownItem} hover:bg-red-50 hover:text-red-600`}
                           onClick={() => {
                             logout();
@@ -454,7 +556,9 @@ const Header = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className={iconBtn}
+                className={`${iconBtn} ${
+                  isHomePage && !scrolled ? "text-white hover:bg-white/20" : "text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                }`}
               >
                 {isMenuOpen ? <X /> : <Menu />}
               </Button>
@@ -464,26 +568,52 @@ const Header = () => {
                   <div className="p-4 border-b bg-gradient-to-r from-gray-50 to-blue-50">
                     <p className="font-medium text-gray-900">Menu</p>
                   </div>
-                  <Link to="/" className={`${dropdownItem} hover:bg-blue-50 hover:text-blue-600`} onClick={() => setIsMenuOpen(false)}>
+                  <Link
+                    to="/"
+                    className={`${dropdownItem} hover:bg-blue-50 hover:text-blue-600`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     Home
                   </Link>
-                  <Link to="/men" className={`${dropdownItem} hover:bg-blue-50 hover:text-blue-600`} onClick={() => setIsMenuOpen(false)}>
+                  <Link
+                    to="/explore"
+                    className={`${dropdownItem} hover:bg-blue-50 hover:text-blue-600`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Compass className="h-4 w-4 mr-2" />
+                    Explore
+                  </Link>
+                  <Link
+                    to="/men"
+                    className={`${dropdownItem} hover:bg-blue-50 hover:text-blue-600`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     Men
                   </Link>
-                  <Link to="/women" className={`${dropdownItem} hover:bg-blue-50 hover:text-blue-600`} onClick={() => setIsMenuOpen(false)}>
+                  <Link
+                    to="/women"
+                    className={`${dropdownItem} hover:bg-blue-50 hover:text-blue-600`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     Women
                   </Link>
-                  <Link to="/sale" className={`${dropdownItem} hover:bg-blue-50 hover:text-blue-600`} onClick={() => setIsMenuOpen(false)}>
+                  <Link
+                    to="/sale"
+                    className={`${dropdownItem} hover:bg-blue-50 hover:text-blue-600`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
                     Sale
                   </Link>
                   {!seller && (
-                    <>
-                      <div className="border-t mt-2 pt-2">
-                        <Link to="/seller-login" className={`${dropdownItem} hover:bg-gray-50`} onClick={() => setIsMenuOpen(false)}>
-                          Become a Seller
-                        </Link>
-                      </div>
-                    </>
+                    <div className="border-t mt-2 pt-2">
+                      <Link
+                        to="/seller-login"
+                        className={`${dropdownItem} hover:bg-gray-50`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Become a Seller
+                      </Link>
+                    </div>
                   )}
                 </div>
               )}
@@ -492,18 +622,22 @@ const Header = () => {
         </div>
       </header>
 
-      <div className="h-[88px]" /> {/* Reduced height since announcement bar is removed */}
+      {/* Spacer - ONLY on non-home pages to prevent content from hiding under fixed header */}
+      {!isHomePage && <div className="h-[72px] md:h-[88px]" />}
     </>
   );
 };
 
 export default Header;
 
-const navLink = "text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded-lg hover:bg-blue-50";
-const dropdownItem = "w-full text-left px-4 py-3 text-sm transition-colors flex items-center";
-const iconBtn = "text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors rounded-full";
+const navLink =
+  "transition-colors font-medium px-2 py-1 rounded-lg flex items-center gap-1 text-sm lg:text-base";
+const dropdownItem =
+  "w-full text-left px-4 py-3 text-sm transition-colors flex items-center";
+const iconBtn =
+  "transition-colors rounded-full";
 
-/* ---------------- CART DRAWER - FIXED WITH AUTO REMOVAL ---------------- */
+/* ---------------- CART DRAWER ---------------- */
 const CartDrawer = ({
   items,
   removeItem,
@@ -513,16 +647,19 @@ const CartDrawer = ({
   navigate,
   user,
 }) => {
-  const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalPrice = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
 
   // Function to handle navigating to product details and removing incomplete item
   const handleSelectOptions = (item) => {
     // Get the unique key for this item
     const itemKey = `${item.id}_${item.selectedColorId || "no-color"}_${item.selectedSizeId || "no-size"}`;
-    
+
     // Remove the incomplete item from cart
     removeItem(itemKey);
-    
+
     // Navigate to product page
     navigate(`/product/${item.id}`);
     onClose();
@@ -536,8 +673,8 @@ const CartDrawer = ({
     }
 
     // Check if any item is missing color or size selection
-    const incompleteItems = items.filter(item => 
-      !item.selectedColorId || !item.selectedSizeId
+    const incompleteItems = items.filter(
+      (item) => !item.selectedColorId || !item.selectedSizeId,
     );
 
     if (incompleteItems.length > 0) {
@@ -553,8 +690,8 @@ const CartDrawer = ({
   };
 
   // Check if all items have color and size selected
-  const isCheckoutReady = items.every(item => 
-    item.selectedColorId && item.selectedSizeId
+  const isCheckoutReady = items.every(
+    (item) => item.selectedColorId && item.selectedSizeId,
   );
 
   return (
@@ -562,7 +699,9 @@ const CartDrawer = ({
       <div className="p-6 border-b flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50">
         <div>
           <h2 className="text-xl font-bold text-gray-900">Shopping Cart</h2>
-          <p className="text-sm text-gray-600">{totalItems} item{totalItems !== 1 ? 's' : ''} in cart</p>
+          <p className="text-sm text-gray-600">
+            {totalItems} item{totalItems !== 1 ? "s" : ""}
+          </p>
         </div>
         <Button
           variant="ghost"
@@ -578,7 +717,9 @@ const CartDrawer = ({
         {items.length === 0 ? (
           <div className="text-center py-12">
             <ShoppingCart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">Your cart is empty</h3>
+            <h3 className="text-lg font-medium text-gray-700 mb-2">
+              Your cart is empty
+            </h3>
             <p className="text-gray-500 mb-6">Add some items to get started</p>
             <Button
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
@@ -594,7 +735,7 @@ const CartDrawer = ({
           items.map((item) => {
             const itemKey = `${item.id}_${item.selectedColorId || "no-color"}_${item.selectedSizeId || "no-size"}`;
             const isIncomplete = !item.selectedColorId || !item.selectedSizeId;
-            
+
             return (
               <div
                 key={itemKey}
@@ -607,29 +748,37 @@ const CartDrawer = ({
                 />
 
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-900 truncate">{item.name}</h3>
-                  
+                  <h3 className="font-medium text-gray-900 truncate">
+                    {item.name}
+                  </h3>
+
                   <div className="mt-1 space-y-1">
                     {item.selectedColorName && item.selectedColorId ? (
                       <p className="text-xs text-gray-600">
-                        Color: <span className="font-medium">{item.selectedColorName}</span>
+                        Color:{" "}
+                        <span className="font-medium">
+                          {item.selectedColorName}
+                        </span>
                       </p>
                     ) : (
                       <p className="text-xs text-red-500">
                         ⚠️ Color not selected
                       </p>
                     )}
-                    
+
                     {item.selectedSizeName && item.selectedSizeId ? (
                       <p className="text-xs text-gray-600">
-                        Size: <span className="font-medium">{item.selectedSizeName}</span>
+                        Size:{" "}
+                        <span className="font-medium">
+                          {item.selectedSizeName}
+                        </span>
                       </p>
                     ) : (
                       <p className="text-xs text-red-500">
                         ⚠️ Size not selected
                       </p>
                     )}
-                    
+
                     <p className="text-xs text-gray-600">
                       Qty: <span className="font-medium">{item.quantity}</span>
                     </p>
@@ -679,7 +828,9 @@ const CartDrawer = ({
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">Rs. {totalPrice.toLocaleString()}</span>
+              <span className="font-medium">
+                Rs. {totalPrice.toLocaleString()}
+              </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Items</span>
@@ -688,10 +839,12 @@ const CartDrawer = ({
             <div className="pt-2 border-t">
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span className="text-red-600">Rs. {totalPrice.toLocaleString()}</span>
+                <span className="text-red-600">
+                  Rs. {totalPrice.toLocaleString()}
+                </span>
               </div>
             </div>
-            
+
             {/* Warning message for incomplete items */}
             {!isCheckoutReady && (
               <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -700,8 +853,7 @@ const CartDrawer = ({
                   Some items need color/size selection
                 </p>
                 <p className="text-xs text-yellow-600 mt-1">
-                  Clicking "Select Options" will remove the item from cart. 
-                  You can add it back with selected options on the product page.
+                  Clicking "Select Options" will remove the item from cart.
                 </p>
               </div>
             )}
@@ -713,11 +865,13 @@ const CartDrawer = ({
               onClick={handleCheckout}
               disabled={items.length === 0}
             >
-              {!user ? "Login to Checkout" : 
-               !isCheckoutReady ? "Complete Item Selection" : 
-               "Proceed to Checkout"}
+              {!user
+                ? "Login to Checkout"
+                : !isCheckoutReady
+                  ? "Complete Item Selection"
+                  : "Proceed to Checkout"}
             </Button>
-            
+
             <Button
               variant="outline"
               className="w-full h-12"
@@ -725,7 +879,7 @@ const CartDrawer = ({
             >
               Clear Cart
             </Button>
-            
+
             <Button
               variant="ghost"
               className="w-full h-12"
@@ -756,7 +910,9 @@ const WishlistDrawer = ({
       <div className="p-6 border-b flex justify-between items-center bg-gradient-to-r from-pink-50 to-rose-50">
         <div>
           <h2 className="text-xl font-bold text-gray-900">Wishlist</h2>
-          <p className="text-sm text-gray-600">{items.length} item{items.length !== 1 ? 's' : ''} saved</p>
+          <p className="text-sm text-gray-600">
+            {items.length} item{items.length !== 1 ? "s" : ""}
+          </p>
         </div>
         <Button
           variant="ghost"
@@ -772,7 +928,9 @@ const WishlistDrawer = ({
         {items.length === 0 ? (
           <div className="text-center py-12">
             <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">Your wishlist is empty</h3>
+            <h3 className="text-lg font-medium text-gray-700 mb-2">
+              Your wishlist is empty
+            </h3>
             <p className="text-gray-500 mb-6">Save items you love for later</p>
             <Button
               className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700"
@@ -797,8 +955,10 @@ const WishlistDrawer = ({
               />
 
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-900 truncate mb-2">{item.name}</h3>
-                
+                <h3 className="font-medium text-gray-900 truncate mb-2">
+                  {item.name}
+                </h3>
+
                 <p className="text-red-600 font-bold mb-4">
                   Rs. {item.price.toLocaleString()}
                 </p>
@@ -840,7 +1000,7 @@ const WishlistDrawer = ({
           >
             Go to Wishlist
           </Button>
-          
+
           <Button
             variant="outline"
             className="w-full h-12 text-red-500 border-red-200 hover:bg-red-50 hover:text-red-700"
